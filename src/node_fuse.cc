@@ -3,29 +3,45 @@
 #include "reply.h"
 #include "file_info.h"
 
+
+using namespace v8;
+
 namespace NodeFuse {
     //stat struct symbols
-    static Persistent<String> uid_sym       = NODE_PSYMBOL("uid");
-    static Persistent<String> gid_sym       = NODE_PSYMBOL("gid");
-    static Persistent<String> pid_sym       = NODE_PSYMBOL("pid");
-    static Persistent<String> dev_sym       = NODE_PSYMBOL("dev");
-    static Persistent<String> mode_sym      = NODE_PSYMBOL("mode");
-    static Persistent<String> nlink_sym     = NODE_PSYMBOL("nlink");
-    static Persistent<String> rdev_sym      = NODE_PSYMBOL("rdev");
-    static Persistent<String> size_sym      = NODE_PSYMBOL("size");
-    static Persistent<String> blksize_sym   = NODE_PSYMBOL("blksize");
-    static Persistent<String> blocks_sym    = NODE_PSYMBOL("blocks");
-    static Persistent<String> atime_sym     = NODE_PSYMBOL("atime");
-    static Persistent<String> mtime_sym     = NODE_PSYMBOL("mtime");
-    static Persistent<String> ctime_sym     = NODE_PSYMBOL("ctime");
+    FUSE_SYM(uid);
+    FUSE_SYM(gid);
+    FUSE_SYM(pid);
+    FUSE_SYM(dev);
+    FUSE_SYM(mode);
+    FUSE_SYM(nlink);
+    FUSE_SYM(rdev);
+    FUSE_SYM(size);
+    FUSE_SYM(blksize);
+    FUSE_SYM(blocks);
+    FUSE_SYM(atime);
+    FUSE_SYM(mtime);
+    FUSE_SYM(ctime);
 
     //entry symbols
-    static Persistent<String> ino_sym           = NODE_PSYMBOL("inode");
-    static Persistent<String> generation_sym    = NODE_PSYMBOL("generation");
-    static Persistent<String> attr_sym          = NODE_PSYMBOL("attr");
-    static Persistent<String> attr_timeout_sym  = NODE_PSYMBOL("attr_timeout");
-    static Persistent<String> entry_timeout_sym = NODE_PSYMBOL("entry_timeout");
+    FUSE_SYM(inode);
+    FUSE_SYM(generation);
+    FUSE_SYM(attr);
+    FUSE_SYM(attr_timeout);
+    FUSE_SYM(entry_timeout);
 
+    //file_info symbols
+    FUSE_SYM(flags);
+    FUSE_SYM(writepage);
+    FUSE_SYM(direct_io);
+    FUSE_SYM(keep_cache);
+    FUSE_SYM(flush);
+    FUSE_SYM(nonseekable);
+    FUSE_SYM(file_handle);
+    FUSE_SYM(lock_owner);
+    
+    
+    
+    
     void InitializeFuse(Handle<Object> target) {
         HandleScope scope;
 
@@ -36,9 +52,9 @@ namespace NodeFuse {
 
         target->Set(String::NewSymbol("version"),
                     String::New(NODE_FUSE_VERSION));
-
         target->Set(String::NewSymbol("fuse_version"),
                     Integer::New(fuse_version()));
+
     }
 
     int ObjectToFuseEntryParam(Handle<Value> value, struct fuse_entry_param* entry) {
@@ -48,7 +64,7 @@ namespace NodeFuse {
         memset(entry, 0, sizeof(entry));
 
         Local<Object> obj = value->ToObject();
-        entry->ino = obj->Get(ino_sym)->IntegerValue();
+        entry->ino = obj->Get(inode_sym)->IntegerValue();
         entry->generation = obj->Get(generation_sym)->IntegerValue();
         entry->attr_timeout = obj->Get(attr_timeout_sym)->NumberValue();
         entry->entry_timeout = obj->Get(entry_timeout_sym)->NumberValue();
@@ -67,7 +83,7 @@ namespace NodeFuse {
         Local<Object> obj = value->ToObject();
 
         statbuf->st_dev = obj->Get(dev_sym)->IntegerValue();
-        statbuf->st_ino = obj->Get(ino_sym)->IntegerValue();
+        statbuf->st_ino = obj->Get(inode_sym)->IntegerValue();
         statbuf->st_mode = obj->Get(mode_sym)->IntegerValue();
         statbuf->st_nlink = obj->Get(nlink_sym)->IntegerValue();
         statbuf->st_uid = obj->Get(uid_sym)->IntegerValue();
@@ -114,7 +130,7 @@ namespace NodeFuse {
         return scope.Close(attrs);
     }
 
-    /*Handle<Value> FileInfoToObject(struct fuse_file_info* fi) {
+    Handle<Value> FileInfoToObject(struct fuse_file_info* fi) {
         HandleScope scope;
         Local<Object> info = Object::New();
 
@@ -123,17 +139,25 @@ namespace NodeFuse {
         info->Set(direct_io_sym, Integer::NewFromUnsigned(fi->direct_io));
         info->Set(keep_cache_sym, Integer::NewFromUnsigned(fi->keep_cache));
         info->Set(flush_sym, Integer::NewFromUnsigned(fi->flush));
-        //info->Set(nonseekable_sym, Integer::NewFromUnsigned(fi->nonseekable));
+        info->Set(nonseekable_sym, Integer::NewFromUnsigned(fi->nonseekable));
         info->Set(file_handle_sym, Number::New(fi->fh));
         info->Set(lock_owner_sym, Number::New(fi->lock_owner));
 
         //TODO set accessors for info.fh
         return scope.Close(info);
-    }*/
+    }
 
     Handle<Value> FuseEntryParamToObject(const struct fuse_entry_param* entry) {
         HandleScope scope;
+        Local<Object> rv = Object::New();
 
+        rv->Set(inode_sym, Integer::New(entry->ino));
+        rv->Set(generation_sym, Integer::New(entry->generation));
+        rv->Set(attr_timeout_sym, Integer::New(entry->attr_timeout));
+        rv->Set(entry_timeout_sym, Integer::New(entry->entry_timeout));
+        
+        return scope.Close(rv);
+	
     }
 
     Handle<Value> RequestContextToObject(const struct fuse_ctx* ctx) {

@@ -30,4 +30,9 @@ namespace NodeFuse {
     };
 }//namespace NodeFuse
 
+// symbol macro
+#define FUSE_SYM(name) \
+    static Persistent<String> name ## _sym           = NODE_PSYMBOL( #name );
+
+
 #endif  // SRC_BINDINGS_H
