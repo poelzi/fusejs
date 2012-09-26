@@ -2,7 +2,7 @@
 #include "bindings.h"
 #include "reply.h"
 #include "file_info.h"
-
+#include "sys/statvfs.h"
 
 using namespace v8;
 
@@ -40,6 +40,22 @@ namespace NodeFuse {
     FUSE_SYM(lock_owner);
     
     
+    //statvfs symbols
+    FUSE_SYM(bsize);
+    FUSE_SYM(frsize);
+    FUSE_SYM(bfree);
+    FUSE_SYM(bavail);
+    FUSE_SYM(files);
+    FUSE_SYM(ffree);
+    FUSE_SYM(favail);
+    FUSE_SYM(fsid);
+    FUSE_SYM(flag);
+    FUSE_SYM(type);
+    FUSE_SYM(namemax);
+    FUSE_SYM(basetype);
+    FUSE_SYM(str);
+    
+    
     
     
     void InitializeFuse(Handle<Object> target) {
@@ -69,7 +85,7 @@ namespace NodeFuse {
         entry->attr_timeout = obj->Get(attr_timeout_sym)->NumberValue();
         entry->entry_timeout = obj->Get(entry_timeout_sym)->NumberValue();
 
-        struct stat statbuf;
+        //struct stat statbuf;
         ret = ObjectToStat(obj->Get(attr_sym), &entry->attr);
 
         return ret;
@@ -99,6 +115,33 @@ namespace NodeFuse {
         return 0;
     }
 
+    
+    int ObjectToStat(Handle<Value> value, struct statvfs* statbuf) {
+        HandleScope scope;
+
+        memset(statbuf, 0, sizeof(struct statvfs));
+
+        Local<Object> obj = value->ToObject();
+        
+        statbuf->f_bsize = ValueToUlong(obj->Get(bsize_sym));
+        statbuf->f_frsize = ValueToUlong(obj->Get(blocks_sym));
+        
+        statbuf->f_blocks = obj->Get(mode_sym)->IntegerValue();
+        statbuf->f_bfree = obj->Get(nlink_sym)->IntegerValue();
+        statbuf->f_bavail = obj->Get(uid_sym)->IntegerValue();
+        statbuf->f_files = obj->Get(gid_sym)->IntegerValue();
+        statbuf->f_ffree = obj->Get(rdev_sym)->IntegerValue();
+        statbuf->f_favail = obj->Get(size_sym)->NumberValue();
+
+        
+        statbuf->f_fsid = ValueToUlong(obj->Get(blksize_sym));
+        statbuf->f_flag = ValueToUlong(obj->Get(flag_sym));
+        statbuf->f_namemax = ValueToUlong(obj->Get(namemax_sym));
+       
+        return 0;
+    }
+
+    
     Handle<Value> GetAttrsToBeSet(int to_set, struct stat* stat) {
         HandleScope scope;
         Local<Object> attrs = Object::New();

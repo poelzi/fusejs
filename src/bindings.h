@@ -3,6 +3,7 @@
 #define SRC_BINDINGS_H_
 #include "node_fuse.h"
 #include "filesystem.h"
+#include <stdlib.h>
 
 namespace NodeFuse {
     class Fuse : public ObjectWrap {
@@ -34,5 +35,19 @@ namespace NodeFuse {
 #define FUSE_SYM(name) \
     static Persistent<String> name ## _sym           = NODE_PSYMBOL( #name );
 
+inline unsigned long ValueToUlong(v8::Handle<Value> value) {
+        if(value->IsInt32())
+          return (unsigned long)value->Int32Value();
+        if(value->IsUint32())
+          return (unsigned long)value->Uint32Value();
 
+        String::AsciiValue str(value);
+        if(str.length())
+            return strtoul(*str, NULL, 10);
+
+        return 0;
+    }
+
+    
+    
 #endif  // SRC_BINDINGS_H
