@@ -9,6 +9,9 @@
             "url": "http://github.com/c4milo/fusejs.git"
        }
     ],
+    "dependencies": {
+        "node-gyp": "*"
+    },
     "devDependencies": {
         "mocha": "0.14.1",
         "should": "0.6.0"
