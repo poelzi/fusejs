@@ -35,7 +35,10 @@ namespace NodeFuse {
     }
 
     Handle<Value> FileInfo::GetFlags(Local<String> property, const AccessorInfo& info) {
+        HandleScope scope;
         FileInfo *fileInfo = ObjectWrap::Unwrap<FileInfo>(info.This());
+
+        return scope.Close(Integer::New(fileInfo->fi->flags));
         /*
            O_RDONLY        open for reading only
            O_WRONLY        open for writing only
