@@ -27,6 +27,8 @@ namespace NodeFuse {
         fuse_ops.rename  = FileSystem::Rename;
         fuse_ops.link    = FileSystem::Link;
         fuse_ops.open    = FileSystem::Open;
+        fuse_ops.read    = FileSystem::Read;
+        
         fuse_ops.statfs  = FileSystem::Statfs;
 
     };
@@ -48,6 +50,7 @@ namespace NodeFuse {
     static Persistent<String> link_sym      = NODE_PSYMBOL("link");
     static Persistent<String> open_sym      = NODE_PSYMBOL("open");
     FUSE_SYM(statfs);
+    FUSE_SYM(read);
 
     //fuse_conn_info symbols
     //Major version of the fuse protocol
@@ -526,13 +529,19 @@ namespace NodeFuse {
     } \
     Local<Function> name = Local<Function>::Cast(v ## name); \
     
-
+#define NFUSE_NEW_WRAP(cls, name, input) \
+    cls* name = new cls(); \
+    input ;\
+    Local<Object> name ## Obj = name->constructor_template->GetFunction()->NewInstance(); \
+    name->Wrap(name ## Obj);
+    
 #define NFUSE_NEW_REPLY(name) \
-    Reply* name = new Reply(); \
-    reply->request = req; \
-    Local<Object> name ## Obj = reply->constructor_template->GetFunction()->NewInstance(); \
-    reply->Wrap(name ## Obj);
-
+    NFUSE_NEW_WRAP(Reply, name, name->request = req)
+    
+#define NFUSE_NEW_FILEINFO(name, input) \
+    NFUSE_NEW_WRAP(FileInfo, name, name->fi = input)
+    
+    
 #define NFUSE_FS_HEAD \
     HandleScope scope; \
     Fuse* fuse = static_cast<Fuse *>(fuse_req_userdata(req)); \
@@ -544,11 +553,33 @@ namespace NodeFuse {
 
 #define NFUSE_FS_END(name) \
     TryCatch try_catch; \
-    name ->Call(fuse->fsobj, 3, argv);\
+    name ->Call(fuse->fsobj, sizeof(argv)/sizeof(argv[0]), argv);\
     if (try_catch.HasCaught()) { \
         FatalException(try_catch); \
     }
 
+    void FileSystem::Read(fuse_req_t req,
+                          fuse_ino_t ino,
+                          size_t fsize,
+                          off_t foff,
+                          struct fuse_file_info *fi
+                         ) {
+        
+        NFUSE_FS_SETUP(read);
+        
+        Local<Number> inode = Number::New(ino);
+        Local<Integer> size = Integer::New(fsize);
+        Local<Integer> off = Integer::New(foff);
+        
+        NFUSE_NEW_FILEINFO(info, fi);
+        
+        NFUSE_NEW_REPLY(reply);
+        
+        Local<Value> argv[6] = {context, inode, size, off, infoObj, replyObj};
+
+        NFUSE_FS_END(read)
+        
+    }
     
     void FileSystem::Statfs(fuse_req_t req,
                           fuse_ino_t ino) {
