@@ -7,6 +7,8 @@ namespace NodeFuse {
         public:
             FileSystem();
             virtual ~FileSystem();
+            
+            static void Initialize();
 
             static struct fuse_lowlevel_ops* GetOperations();
             static void Init(void* userdata,
@@ -58,6 +60,8 @@ namespace NodeFuse {
             static void Open(fuse_req_t req,
                              fuse_ino_t ino,
                              struct fuse_file_info* fi);
+            static void Statfs(fuse_req_t req,
+                               fuse_ino_t ino);
     };
 }//namespace NodeFuse
 

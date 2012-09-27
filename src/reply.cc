@@ -13,6 +13,7 @@ namespace NodeFuse {
         NODE_SET_PROTOTYPE_METHOD(t, "attr", Reply::Attributes);
         NODE_SET_PROTOTYPE_METHOD(t, "readlink", Reply::ReadLink);
         NODE_SET_PROTOTYPE_METHOD(t, "err", Reply::Error);
+        NODE_SET_PROTOTYPE_METHOD(t, "statvfs", Reply::StatVfs);
 
         constructor_template = Persistent<FunctionTemplate>::New(t);
         constructor_template->SetClassName(String::NewSymbol("Reply"));
@@ -117,6 +118,33 @@ namespace NodeFuse {
         String::Utf8Value link(arg->ToString());
 
         fuse_reply_readlink(reply->request, (const char*) *link);
+        return Undefined();
+    }
+
+    Handle<Value> Reply::StatVfs(const Arguments& args) {
+        HandleScope scope;
+
+        Local<Object> replyObj = args.This();
+        Reply* reply = ObjectWrap::Unwrap<Reply>(replyObj);
+        struct statvfs buf;
+
+        int argslen = args.Length();
+
+        if (argslen == 0) {
+            return ThrowException(Exception::TypeError(
+            String::New("You must specify arguments to invoke this function")));
+        }
+
+        Local<Value> arg = args[0];
+        if (!arg->IsObject()) {
+            return ThrowException(Exception::TypeError(
+            String::New("You must specify a object as first argument")));
+        }
+
+        ObjectToStatVfs(arg, &buf);
+        
+        fuse_reply_statfs(reply->request, &buf);
+
         return Undefined();
     }
 

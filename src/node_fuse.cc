@@ -43,6 +43,7 @@ namespace NodeFuse {
     //statvfs symbols
     FUSE_SYM(bsize);
     FUSE_SYM(frsize);
+    //FUSE_SYM(blocks);
     FUSE_SYM(bfree);
     FUSE_SYM(bavail);
     FUSE_SYM(files);
@@ -61,6 +62,7 @@ namespace NodeFuse {
     void InitializeFuse(Handle<Object> target) {
         HandleScope scope;
 
+        FileSystem::Initialize();
         Fuse::Initialize(target);
         Reply::Initialize();
         FileInfo::Initialize();
@@ -116,7 +118,7 @@ namespace NodeFuse {
     }
 
     
-    int ObjectToStat(Handle<Value> value, struct statvfs* statbuf) {
+    int ObjectToStatVfs(Handle<Value> value, struct statvfs* statbuf) {
         HandleScope scope;
 
         memset(statbuf, 0, sizeof(struct statvfs));
@@ -126,15 +128,15 @@ namespace NodeFuse {
         statbuf->f_bsize = ValueToUlong(obj->Get(bsize_sym));
         statbuf->f_frsize = ValueToUlong(obj->Get(blocks_sym));
         
-        statbuf->f_blocks = obj->Get(mode_sym)->IntegerValue();
-        statbuf->f_bfree = obj->Get(nlink_sym)->IntegerValue();
-        statbuf->f_bavail = obj->Get(uid_sym)->IntegerValue();
-        statbuf->f_files = obj->Get(gid_sym)->IntegerValue();
-        statbuf->f_ffree = obj->Get(rdev_sym)->IntegerValue();
-        statbuf->f_favail = obj->Get(size_sym)->NumberValue();
+        statbuf->f_blocks = obj->Get(blocks_sym)->IntegerValue();
+        statbuf->f_bfree = obj->Get(bfree_sym)->IntegerValue();
+        statbuf->f_bavail = obj->Get(bavail_sym)->IntegerValue();
+        statbuf->f_files = obj->Get(files_sym)->IntegerValue();
+        statbuf->f_ffree = obj->Get(ffree_sym)->IntegerValue();
+        statbuf->f_favail = obj->Get(favail_sym)->NumberValue();
 
         
-        statbuf->f_fsid = ValueToUlong(obj->Get(blksize_sym));
+        statbuf->f_fsid = ValueToUlong(obj->Get(fsid_sym));
         statbuf->f_flag = ValueToUlong(obj->Get(flag_sym));
         statbuf->f_namemax = ValueToUlong(obj->Get(namemax_sym));
        

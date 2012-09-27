@@ -3,24 +3,32 @@
 #include "file_info.h"
 #include "bindings.h"
 
+typedef struct fuse_lowlevel_ops fuops;
+
 namespace NodeFuse {
 
-    static struct fuse_lowlevel_ops fuse_ops = {
-        init    : FileSystem::Init,
-        destroy : FileSystem::Destroy,
-        lookup  : FileSystem::Lookup,
-        forget  : FileSystem::Forget,
-        getattr : FileSystem::GetAttr,
-        setattr : FileSystem::SetAttr,
-        readlink: FileSystem::ReadLink,
-        mknod   : FileSystem::MkNod,
-        mkdir   : FileSystem::MkDir,
-        unlink  : FileSystem::Unlink,
-        rmdir   : FileSystem::RmDir,
-        symlink : FileSystem::SymLink,
-        rename  : FileSystem::Rename,
-        link    : FileSystem::Link,
-        open    : FileSystem::Open
+    static struct fuse_lowlevel_ops fuse_ops = {};
+    
+    
+    static void fill_ops() {
+      // c++ does not support designated initializers
+        fuse_ops.init    = FileSystem::Init;
+        fuse_ops.destroy = FileSystem::Destroy;
+        fuse_ops.lookup  = FileSystem::Lookup;
+        fuse_ops.forget  = FileSystem::Forget;
+        fuse_ops.getattr = FileSystem::GetAttr;
+        fuse_ops.setattr = FileSystem::SetAttr;
+        fuse_ops.readlink= FileSystem::ReadLink;
+        fuse_ops.mknod   = FileSystem::MkNod;
+        fuse_ops.mkdir   = FileSystem::MkDir;
+        fuse_ops.unlink  = FileSystem::Unlink;
+        fuse_ops.rmdir   = FileSystem::RmDir;
+        fuse_ops.symlink = FileSystem::SymLink;
+        fuse_ops.rename  = FileSystem::Rename;
+        fuse_ops.link    = FileSystem::Link;
+        fuse_ops.open    = FileSystem::Open;
+        fuse_ops.statfs  = FileSystem::Statfs;
+
     };
 
     //Operations symbols
@@ -39,6 +47,7 @@ namespace NodeFuse {
     static Persistent<String> rename_sym    = NODE_PSYMBOL("rename");
     static Persistent<String> link_sym      = NODE_PSYMBOL("link");
     static Persistent<String> open_sym      = NODE_PSYMBOL("open");
+    FUSE_SYM(statfs);
 
     //fuse_conn_info symbols
     //Major version of the fuse protocol
@@ -56,6 +65,10 @@ namespace NodeFuse {
     //Capability flags, that the filesystem wants to enable
     static Persistent<String> conn_info_want_sym            = NODE_PSYMBOL("want");
 
+    
+    void FileSystem::Initialize() {
+        fill_ops();
+    }
 
     void FileSystem::Init(void* userdata,
                           struct fuse_conn_info* conn) {
@@ -502,6 +515,54 @@ namespace NodeFuse {
         if (try_catch.HasCaught()) {
             FatalException(try_catch);
         }
+    }
+
+
+#define NFUSE_GET_FS_FUNC(name) \
+    Local<Value> v ## name = fuse->fsobj->Get(name ##_sym); \
+    if(! v ## name->IsFunction()) { \
+      fuse_reply_err(req, ENOSYS); \
+      return;    \
+    } \
+    Local<Function> name = Local<Function>::Cast(v ## name); \
+    
+
+#define NFUSE_NEW_REPLY(name) \
+    Reply* name = new Reply(); \
+    reply->request = req; \
+    Local<Object> name ## Obj = reply->constructor_template->GetFunction()->NewInstance(); \
+    reply->Wrap(name ## Obj);
+
+#define NFUSE_FS_HEAD \
+    HandleScope scope; \
+    Fuse* fuse = static_cast<Fuse *>(fuse_req_userdata(req)); \
+    Local<Object> context = RequestContextToObject(fuse_req_ctx(req))->ToObject();
+
+#define NFUSE_FS_SETUP(name)\
+    NFUSE_FS_HEAD; \
+    NFUSE_GET_FS_FUNC(name)
+
+#define NFUSE_FS_END(name) \
+    TryCatch try_catch; \
+    name ->Call(fuse->fsobj, 3, argv);\
+    if (try_catch.HasCaught()) { \
+        FatalException(try_catch); \
+    }
+
+    
+    void FileSystem::Statfs(fuse_req_t req,
+                          fuse_ino_t ino) {
+        
+        NFUSE_FS_SETUP(statfs);
+        
+        Local<Number> inode = Number::New(ino);
+
+        NFUSE_NEW_REPLY(reply);
+        
+        Local<Value> argv[3] = {context, inode, replyObj};
+
+        NFUSE_FS_END(statfs)
+        
     }
 
 
