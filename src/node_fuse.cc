@@ -38,8 +38,8 @@ namespace NodeFuse {
     FUSE_SYM(nonseekable);
     FUSE_SYM(file_handle);
     FUSE_SYM(lock_owner);
-    
-    
+
+
     //statvfs symbols
     FUSE_SYM(bsize);
     FUSE_SYM(frsize);
@@ -55,10 +55,16 @@ namespace NodeFuse {
     FUSE_SYM(namemax);
     FUSE_SYM(basetype);
     FUSE_SYM(str);
-    
-    
-    
-    
+
+    //FUSE_SYM(type);
+    FUSE_SYM(whence);
+    FUSE_SYM(start);
+    FUSE_SYM(len);
+    //FUSE_SYM(pid);
+
+
+
+
     void InitializeFuse(Handle<Object> target) {
         HandleScope scope;
 
@@ -117,17 +123,17 @@ namespace NodeFuse {
         return 0;
     }
 
-    
+
     int ObjectToStatVfs(Handle<Value> value, struct statvfs* statbuf) {
         HandleScope scope;
 
         memset(statbuf, 0, sizeof(struct statvfs));
 
         Local<Object> obj = value->ToObject();
-        
+
         statbuf->f_bsize = ValueToUlong(obj->Get(bsize_sym));
         statbuf->f_frsize = ValueToUlong(obj->Get(blocks_sym));
-        
+
         statbuf->f_blocks = obj->Get(blocks_sym)->IntegerValue();
         statbuf->f_bfree = obj->Get(bfree_sym)->IntegerValue();
         statbuf->f_bavail = obj->Get(bavail_sym)->IntegerValue();
@@ -135,15 +141,31 @@ namespace NodeFuse {
         statbuf->f_ffree = obj->Get(ffree_sym)->IntegerValue();
         statbuf->f_favail = obj->Get(favail_sym)->NumberValue();
 
-        
+
         statbuf->f_fsid = ValueToUlong(obj->Get(fsid_sym));
         statbuf->f_flag = ValueToUlong(obj->Get(flag_sym));
         statbuf->f_namemax = ValueToUlong(obj->Get(namemax_sym));
-       
+
         return 0;
     }
 
-    
+    int ObjectToFlock(Handle<Value> value, struct flock* lock) {
+        HandleScope scope;
+
+        memset(lock, 0, sizeof(struct flock));
+
+        Local<Object> obj = value->ToObject();
+
+        lock->l_type = obj->Get(type_sym)->IntegerValue();
+        lock->l_whence = obj->Get(whence_sym)->IntegerValue();
+        lock->l_start = obj->Get(start_sym)->IntegerValue();
+        lock->l_len = obj->Get(len_sym)->IntegerValue();
+        lock->l_pid = obj->Get(pid_sym)->IntegerValue();
+
+        return 0;
+    }
+
+
     Handle<Value> GetAttrsToBeSet(int to_set, struct stat* stat) {
         HandleScope scope;
         Local<Object> attrs = Object::New();
@@ -192,6 +214,21 @@ namespace NodeFuse {
         return scope.Close(info);
     }
 
+
+    Handle<Value> FlockToObject(const struct flock *lock) {
+        HandleScope scope;
+        Local<Object> rv = Object::New();
+
+        rv->Set(type_sym, Integer::New(lock->l_type));
+        rv->Set(whence_sym, Integer::New(lock->l_whence));
+        rv->Set(start_sym, Integer::New(lock->l_start));
+        rv->Set(len_sym, Integer::New(lock->l_len));
+        rv->Set(pid_sym, Integer::New(lock->l_pid));
+
+        return scope.Close(rv);
+    }
+
+
     Handle<Value> FuseEntryParamToObject(const struct fuse_entry_param* entry) {
         HandleScope scope;
         Local<Object> rv = Object::New();
@@ -200,9 +237,9 @@ namespace NodeFuse {
         rv->Set(generation_sym, Integer::New(entry->generation));
         rv->Set(attr_timeout_sym, Integer::New(entry->attr_timeout));
         rv->Set(entry_timeout_sym, Integer::New(entry->entry_timeout));
-        
+
         return scope.Close(rv);
-	
+
     }
 
     Handle<Value> RequestContextToObject(const struct fuse_ctx* ctx) {

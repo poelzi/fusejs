@@ -7,7 +7,7 @@ namespace NodeFuse {
         public:
             FileSystem();
             virtual ~FileSystem();
-            
+
             static void Initialize();
 
             static struct fuse_lowlevel_ops* GetOperations();
@@ -65,8 +65,87 @@ namespace NodeFuse {
                              size_t size,
                              off_t off,
                              struct fuse_file_info *fi);
+            static void Write(fuse_req_t req,
+                              fuse_ino_t ino,
+                              const char *buf,
+                              size_t size,
+                              off_t off,
+                              struct fuse_file_info *fi);
+            static void Flush(fuse_req_t req,
+                              fuse_ino_t ino,
+                              struct fuse_file_info *fi);
+            static void Release(fuse_req_t req,
+                                fuse_ino_t ino,
+                                struct fuse_file_info *fi);
+            static void Fsync(fuse_req_t req,
+                              fuse_ino_t ino,
+                              int datasync,
+                              struct fuse_file_info *fi);
+            static void Opendir(fuse_req_t req,
+                                fuse_ino_t ino,
+                                struct fuse_file_info *fi);
+            static void Readdir(fuse_req_t req,
+                                fuse_ino_t ino,
+                                size_t size,
+                                off_t off,
+                                struct fuse_file_info *fi);
+            static void Releasedir(fuse_req_t req,
+                                   fuse_ino_t ino,
+                                   struct fuse_file_info *fi);
+            static void Fsyncdir(fuse_req_t req,
+                                 fuse_ino_t ino,
+                                 int datasync,
+                                 struct fuse_file_info *fi);
             static void Statfs(fuse_req_t req,
                                fuse_ino_t ino);
+            static void Setxattr(fuse_req_t req,
+                                 fuse_ino_t ino,
+                                 const char *name,
+                                 const char *value,
+                                 size_t size,
+                                 int flags);
+            static void Getxattr(fuse_req_t req,
+                                 fuse_ino_t ino,
+                                 const char *name,
+                                 size_t size);
+            static void Listxattr(fuse_req_t req,
+                                  fuse_ino_t ino,
+                                  size_t size);
+            static void Removexattr(fuse_req_t req,
+                                    fuse_ino_t ino,
+                                    const char *name);
+            static void Access(fuse_req_t req,
+                               fuse_ino_t ino,
+                               int mask);
+            static void Create(fuse_req_t req,
+                               fuse_ino_t parent,
+                               const char *name,
+                               mode_t mode,
+                               struct fuse_file_info *fi);
+            static void Getlk(fuse_req_t req,
+                              fuse_ino_t ino,
+                              struct fuse_file_info *fi,
+                              struct flock *lock);
+            static void Setlk(fuse_req_t req,
+                              fuse_ino_t ino,
+                              struct fuse_file_info *fi,
+                              struct flock *lock,
+                              int sleep);
+            static void Bmap(fuse_req_t req,
+                             fuse_ino_t ino,
+                             size_t blocksize,
+                             uint64_t idx);
+            static void Ioctl(fuse_req_t req,
+                              fuse_ino_t ino,
+                              int cmd,
+                              void *arg,
+                              struct fuse_file_info *fi,
+                              unsigned *flagsp,
+                              const void *in_buf,
+                              size_t in_bufsz,
+                              size_t out_bufszp);
+            //static void(*  poll )(fuse_req_t req, fuse_ino_t ino, struct fuse_file_info *fi, struct fuse_pollhandle *ph)
+
     };
 }//namespace NodeFuse
 
