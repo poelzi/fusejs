@@ -24,6 +24,24 @@ using namespace node;
         ThrowException(exception);
 
 namespace NodeFuse {
+    enum {
+      REPLY_ERR      = 1<<0,
+      REPLY_NONE     = 1<<1,
+      REPLY_ENTRY    = 1<<2,
+      REPLY_CREATE   = 1<<3,
+      REPLY_ATTR     = 1<<4,
+      REPLY_READLINK = 1<<5,
+      REPLY_OPEN     = 1<<6,
+      REPLY_WRITE    = 1<<7,
+      REPLY_BUF      = 1<<8,
+      REPLY_IOV      = 1<<9,
+      REPLY_STATFS   = 1<<10,
+      REPLY_XATTR    = 1<<11,
+      REPLY_LOCK     = 1<<12,
+      REPLY_BMAP     = 1<<13,
+    };
+
+
     int ObjectToFuseEntryParam(Handle<Value> value, struct fuse_entry_param* entry);
     int ObjectToStat(Handle<Value> value, struct stat* stat);
     int ObjectToStatVfs(Handle<Value> value, struct statvfs* statbuf);

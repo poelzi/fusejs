@@ -566,8 +566,9 @@ namespace NodeFuse {
     Local<Object> name ## Obj = name->constructor_template->GetFunction()->NewInstance(); \
     name->Wrap(name ## Obj);
 
-#define NFUSE_NEW_REPLY(name) \
-    NFUSE_NEW_WRAP(Reply, name, name->request = req)
+#define NFUSE_NEW_REPLY(name, allowd) \
+    NFUSE_NEW_WRAP(Reply, name, name->request = req)\
+    name->allowed = allowd;
 
 #define NFUSE_NEW_FILEINFO(name, input) \
     NFUSE_NEW_WRAP(FileInfo, name, name->fi = input)
@@ -606,7 +607,7 @@ namespace NodeFuse {
 
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_BUF);
 
         Local<Value> argv[6] = {context, inode, size, off, infoObj, replyObj};
 
@@ -630,7 +631,7 @@ namespace NodeFuse {
         Local<Integer> off = Integer::New(foff);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_WRITE);
 
         Local<Value> argv[6] = {context, inode, buffer, off, infoObj, replyObj};
 
@@ -646,7 +647,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[6] = {context, inode, infoObj, replyObj};
 
@@ -662,7 +663,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[6] = {context, inode, infoObj, replyObj};
 
@@ -679,7 +680,7 @@ namespace NodeFuse {
         Local<Number> sync = Number::New(datasync);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[6] = {context, inode, sync, infoObj, replyObj};
 
@@ -695,7 +696,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_OPEN);
 
         Local<Value> argv[6] = {context, inode, infoObj, replyObj};
 
@@ -714,7 +715,7 @@ namespace NodeFuse {
         Local<Number> off = Number::New(foff);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_BUF);
 
         Local<Value> argv[6] = {context, inode, size, off, infoObj, replyObj};
 
@@ -729,7 +730,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[4] = {context, inode, infoObj, replyObj};
 
@@ -746,7 +747,7 @@ namespace NodeFuse {
         Local<Number> sync = Number::New(datasync);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[6] = {context, inode, sync, infoObj, replyObj};
 
@@ -759,7 +760,7 @@ namespace NodeFuse {
 
         Local<Number> inode = Number::New(ino);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_STATFS);
 
         Local<Value> argv[3] = {context, inode, replyObj};
 
@@ -781,7 +782,7 @@ namespace NodeFuse {
         Local<Number> size = Number::New(fsize);
         Local<Integer> flags = Integer::New(fflags);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[7] = {context, inode, name, value, size, flags, replyObj};
 
@@ -798,7 +799,7 @@ namespace NodeFuse {
         Local<String> name = String::New(fname);
         Local<Number> size = Number::New(fsize);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_BUF | REPLY_XATTR);
 
         Local<Value> argv[5] = {context, inode, name, size, replyObj};
 
@@ -812,7 +813,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         Local<Integer> size = Integer::New(fsize);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_BUF | REPLY_XATTR);
 
         Local<Value> argv[4] = {context, inode, size, replyObj};
 
@@ -827,7 +828,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         Local<String> name = String::New(fname);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[4] = {context, inode, name, replyObj};
 
@@ -841,7 +842,7 @@ namespace NodeFuse {
         Local<Number> inode = Number::New(ino);
         Local<Integer> mask = Integer::New(fmask);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[7] = {context, inode, mask, replyObj};
 
@@ -860,7 +861,7 @@ namespace NodeFuse {
         Local<Integer> mode = Integer::New(fmode);
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR | REPLY_CREATE);
 
         Local<Value> argv[6] = {context, parent, name, mode, infoObj, replyObj};
 
@@ -878,7 +879,7 @@ namespace NodeFuse {
         Local<Object> lock = FlockToObject(flock)->ToObject();
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_LOCK | REPLY_ERR);
 
         Local<Value> argv[5] = {context, inode, lock, infoObj, replyObj};
 
@@ -897,7 +898,7 @@ namespace NodeFuse {
 
         NFUSE_NEW_FILEINFO(info, fi);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_ERR);
 
         Local<Value> argv[6] = {context, inode, lock, sleep, infoObj, replyObj};
 
@@ -915,7 +916,7 @@ namespace NodeFuse {
         Local<Integer> blocksize = Integer::New(fblocksize);
         Local<Number> idx = Number::New(fidx);
 
-        NFUSE_NEW_REPLY(reply);
+        NFUSE_NEW_REPLY(reply, REPLY_BMAP | REPLY_ERR);
 
         Local<Value> argv[5] = {context, inode, blocksize, idx, replyObj};
 

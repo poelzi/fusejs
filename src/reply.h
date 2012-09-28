@@ -22,6 +22,7 @@ namespace NodeFuse {
 
         private:
             fuse_req_t request;
+            int allowed;
             static Persistent<FunctionTemplate> constructor_template;
     };
 } //namespace NodeFuse
