@@ -1,6 +1,12 @@
 // Copyright 2012, Camilo Aguilar. Cloudescape, LLC.
 #include "reply.h"
 
+#define CHECK_TYPE(FLAG) \
+if(!(reply->allowed & FLAG)) \
+return ThrowException(Exception::TypeError( \
+  String::New("Wrong return type for this call")));
+
+
 namespace NodeFuse {
     Persistent<FunctionTemplate> Reply::constructor_template;
 
@@ -27,6 +33,7 @@ namespace NodeFuse {
 
         Local<Object> replyObj = args.This();
         Reply* reply = ObjectWrap::Unwrap<Reply>(replyObj);
+        CHECK_TYPE(REPLY_ENTRY);
 
         int argslen = args.Length();
 
@@ -59,6 +66,7 @@ namespace NodeFuse {
 
         Local<Object> replyObj = args.This();
         Reply* reply = ObjectWrap::Unwrap<Reply>(replyObj);
+        CHECK_TYPE(REPLY_ATTR);
 
         int argslen = args.Length();
 
@@ -101,6 +109,7 @@ namespace NodeFuse {
 
         Local<Object> replyObj = args.This();
         Reply* reply = ObjectWrap::Unwrap<Reply>(replyObj);
+        CHECK_TYPE(REPLY_READLINK);
 
         int argslen = args.Length();
 
@@ -126,6 +135,7 @@ namespace NodeFuse {
 
         Local<Object> replyObj = args.This();
         Reply* reply = ObjectWrap::Unwrap<Reply>(replyObj);
+        CHECK_TYPE(REPLY_STATFS);
         struct statvfs buf;
 
         int argslen = args.Length();
@@ -142,7 +152,7 @@ namespace NodeFuse {
         }
 
         ObjectToStatVfs(arg, &buf);
-        
+
         fuse_reply_statfs(reply->request, &buf);
 
         return Undefined();
@@ -153,6 +163,7 @@ namespace NodeFuse {
 
         Local<Object> replyObj = args.This();
         Reply* reply = ObjectWrap::Unwrap<Reply>(replyObj);
+        CHECK_TYPE(REPLY_ERR);
 
         int argslen = args.Length();
         if (argslen == 0) {
