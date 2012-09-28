@@ -1,19 +1,19 @@
 // Copyright 2012, Camilo Aguilar. Cloudescape, LLC.
 #include "file_info.h"
+#include "bindings.h"
 
 namespace NodeFuse {
     Persistent<FunctionTemplate> FileInfo::constructor_template;
 
     //FIXME DRY by writing a macro
-
-    static Persistent<String> flags_sym         = NODE_PSYMBOL("flags");
-    static Persistent<String> writepage_sym     = NODE_PSYMBOL("writepage");
-    static Persistent<String> direct_io_sym     = NODE_PSYMBOL("direct_io");
-    static Persistent<String> keep_cache_sym    = NODE_PSYMBOL("keep_cache");
-    static Persistent<String> flush_sym         = NODE_PSYMBOL("flush");
-    static Persistent<String> nonseekable_sym   = NODE_PSYMBOL("nonseekable");
-    static Persistent<String> file_handle_sym   = NODE_PSYMBOL("fh");
-    static Persistent<String> lock_owner_sym    = NODE_PSYMBOL("lock_owner");
+    FUSE_SYM(flags);
+    FUSE_SYM(writepage);
+    FUSE_SYM(direct_io);
+    FUSE_SYM(keep_cache);
+    FUSE_SYM(flush);
+    FUSE_SYM(nonseekable);
+    FUSE_SYM(file_handle);
+    FUSE_SYM(lock_owner);
 
     void FileInfo::Initialize() {
         Local<FunctionTemplate> t = FunctionTemplate::New();
@@ -99,8 +99,11 @@ namespace NodeFuse {
     Handle<Value> FileInfo::GetNonSeekable(Local<String> property, const AccessorInfo& info) {
         FileInfo *fileInfo = ObjectWrap::Unwrap<FileInfo>(info.This());
         //TODO check FUSE VERSION
-        //return fileInfo->fi->nonseekable ? True() : False();
+#if FUSE_USE_VERSION > 25
+        return fileInfo->fi->nonseekable ? True() : False();
+#else
         return False();
+#endif
     }
 
     void FileInfo::SetNonSeekable(Local<String> property, Local<Value> value, const AccessorInfo& info) {

@@ -3,7 +3,7 @@
     {
       "target_name": "fuse",
       "type": "<(library)",
-      "sources": [ 
+      "sources": [
         "src/bindings.cc",
         "src/file_info.cc",
         "src/filesystem.cc",
@@ -31,6 +31,6 @@
         ],
       },
     },
-    
+
   ]
 }

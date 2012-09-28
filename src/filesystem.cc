@@ -54,21 +54,21 @@ namespace NodeFuse {
     };
 
     //Operations symbols
-    static Persistent<String> init_sym      = NODE_PSYMBOL("init");
-    static Persistent<String> destroy_sym   = NODE_PSYMBOL("destroy");
-    static Persistent<String> lookup_sym    = NODE_PSYMBOL("lookup");
-    static Persistent<String> forget_sym    = NODE_PSYMBOL("forget");
-    static Persistent<String> getattr_sym   = NODE_PSYMBOL("getattr");
-    static Persistent<String> setattr_sym   = NODE_PSYMBOL("setattr");
-    static Persistent<String> readlink_sym  = NODE_PSYMBOL("readlink");
-    static Persistent<String> mknod_sym     = NODE_PSYMBOL("mknod");
-    static Persistent<String> mkdir_sym     = NODE_PSYMBOL("mkdir");
-    static Persistent<String> unlink_sym    = NODE_PSYMBOL("unlink");
-    static Persistent<String> rmdir_sym     = NODE_PSYMBOL("rmdir");
-    static Persistent<String> symlink_sym   = NODE_PSYMBOL("symlink");
-    static Persistent<String> rename_sym    = NODE_PSYMBOL("rename");
-    static Persistent<String> link_sym      = NODE_PSYMBOL("link");
-    static Persistent<String> open_sym      = NODE_PSYMBOL("open");
+    FUSE_SYM(init);
+    FUSE_SYM(destroy);
+    FUSE_SYM(lookup);
+    FUSE_SYM(forget);
+    FUSE_SYM(getattr);
+    FUSE_SYM(setattr);
+    FUSE_SYM(readlink);
+    FUSE_SYM(mknod);
+    FUSE_SYM(mkdir);
+    FUSE_SYM(unlink);
+    FUSE_SYM(rmdir);
+    FUSE_SYM(symlink);
+    FUSE_SYM(rename);
+    FUSE_SYM(link);
+    FUSE_SYM(open);
     FUSE_SYM(read);
     FUSE_SYM(write);
     FUSE_SYM(flush);
@@ -91,20 +91,13 @@ namespace NodeFuse {
     FUSE_SYM(ioctl);
 
     //fuse_conn_info symbols
-    //Major version of the fuse protocol
-    static Persistent<String> conn_info_proto_major_sym     = NODE_PSYMBOL("proto_major");
-    //Minor version of the fuse protocol
-    static Persistent<String> conn_info_proto_minor_sym     = NODE_PSYMBOL("proto_minor");
-    //Is asynchronous read supported
-    static Persistent<String> conn_info_async_read_sym      = NODE_PSYMBOL("async_read");
-    //Maximum size of the write buffer
-    static Persistent<String> conn_info_max_write_sym       = NODE_PSYMBOL("max_write");
-    //Maximum readahead
-    static Persistent<String> conn_info_max_readahead_sym   = NODE_PSYMBOL("max_readahead");
-    //Capability flags, that the kernel supports
-    static Persistent<String> conn_info_capable_sym         = NODE_PSYMBOL("capable");
-    //Capability flags, that the filesystem wants to enable
-    static Persistent<String> conn_info_want_sym            = NODE_PSYMBOL("want");
+    FUSE_SYM(conn_info_proto_major);
+    FUSE_SYM(conn_info_proto_minor);
+    FUSE_SYM(conn_info_async_read);
+    FUSE_SYM(conn_info_max_write);
+    FUSE_SYM(conn_info_max_readahead);
+    FUSE_SYM(conn_info_capable);
+    FUSE_SYM(conn_info_want);
 
 
     void FileSystem::Initialize() {

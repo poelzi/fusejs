@@ -206,7 +206,9 @@ namespace NodeFuse {
         info->Set(direct_io_sym, Integer::NewFromUnsigned(fi->direct_io));
         info->Set(keep_cache_sym, Integer::NewFromUnsigned(fi->keep_cache));
         info->Set(flush_sym, Integer::NewFromUnsigned(fi->flush));
+#if FUSE_USE_VERSION > 25
         info->Set(nonseekable_sym, Integer::NewFromUnsigned(fi->nonseekable));
+#endif
         info->Set(file_handle_sym, Number::New(fi->fh));
         info->Set(lock_owner_sym, Number::New(fi->lock_owner));
 

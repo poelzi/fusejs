@@ -1,8 +1,15 @@
-SPECS = spec/*.js 
+SPECS = spec/*.js
 REPORTER = spec
 
-build: 
-	./node_modules/.bin/node-gyp distclean configure build
+all: build
+clean:
+	./node_modules/.bin/node-gyp clean
+
+configure: binding.gyp
+	./node_modules/.bin/node-gyp configure
+
+build: configure
+	./node_modules/.bin/node-gyp build
 
 test: build
 	@NODE_ENV=$(NODE_ENV) ./node_modules/.bin/mocha \
