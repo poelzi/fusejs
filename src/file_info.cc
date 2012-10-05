@@ -15,6 +15,12 @@ namespace NodeFuse {
     FUSE_SYM(file_handle);
     FUSE_SYM(lock_owner);
 
+    FileInfo::~FileInfo() {
+        if(this->fi->fh) {
+            reinterpret_cast<Persistent<Value> *>(this->fi->fh)->Dispose();
+        }
+    }
+
     void FileInfo::Initialize() {
         Local<FunctionTemplate> t = FunctionTemplate::New();
         Local<ObjectTemplate> object_tmpl = t->InstanceTemplate();
@@ -112,24 +118,29 @@ namespace NodeFuse {
         if (!value->IsBoolean()) {
             FUSEJS_THROW_EXCEPTION("Invalid value type: ", "a Boolean was expected");
         }
-        //fileInfo->fi->nonseekable = value->IsTrue() ? 1 : 0;
+#if FUSE_USE_VERSION > 25
+        fileInfo->fi->nonseekable = value->IsTrue() ? 1 : 0;
+#endif
     }
 
     void FileInfo::SetFileHandle(Local<String> property, Local<Value> value, const AccessorInfo& info) {
         FileInfo *fileInfo = ObjectWrap::Unwrap<FileInfo>(info.This());
 
-        if (!value->IsNumber()) {
-            FUSEJS_THROW_EXCEPTION("Invalid value type: ", "a Number was expected");
+        if(fileInfo->fi->fh) {
+            reinterpret_cast<Persistent<Value> *>(fileInfo->fi->fh)->Dispose();
         }
 
-        fileInfo->fi->fh = value->IntegerValue();
+        fileInfo->fi->fh  = (uint64_t)*Persistent<Value>::New(value);
     }
 
     Handle<Value> FileInfo::GetFileHandle(Local<String> property, const AccessorInfo& info) {
         HandleScope scope;
         FileInfo *fileInfo = ObjectWrap::Unwrap<FileInfo>(info.This());
+        if(!fileInfo->fi->fh)
+            return Undefined();
+        Persistent<Value> data = (Value *)(fileInfo->fi->fh);
 
-        return scope.Close(Integer::New(fileInfo->fi->fh));
+        return scope.Close(data);
     }
 
     Handle<Value> FileInfo::GetLockOwner(Local<String> property, const AccessorInfo& info) {

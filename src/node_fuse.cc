@@ -85,7 +85,7 @@ namespace NodeFuse {
         HandleScope scope;
         int ret = -1;
 
-        memset(entry, 0, sizeof(entry));
+        memset(entry, 0, sizeof(struct fuse_entry_param));
 
         Local<Object> obj = value->ToObject();
         entry->ino = obj->Get(inode_sym)->IntegerValue();
@@ -102,7 +102,7 @@ namespace NodeFuse {
     int ObjectToStat(Handle<Value> value, struct stat* statbuf) {
         HandleScope scope;
 
-        memset(statbuf, 0, sizeof(statbuf));
+        memset(statbuf, 0, sizeof(struct stat));
 
         Local<Object> obj = value->ToObject();
 
@@ -196,26 +196,6 @@ namespace NodeFuse {
 
         return scope.Close(attrs);
     }
-
-    Handle<Value> FileInfoToObject(struct fuse_file_info* fi) {
-        HandleScope scope;
-        Local<Object> info = Object::New();
-
-        info->Set(flags_sym, Integer::New(fi->flags));
-        info->Set(writepage_sym, Integer::New(fi->writepage));
-        info->Set(direct_io_sym, Integer::NewFromUnsigned(fi->direct_io));
-        info->Set(keep_cache_sym, Integer::NewFromUnsigned(fi->keep_cache));
-        info->Set(flush_sym, Integer::NewFromUnsigned(fi->flush));
-#if FUSE_USE_VERSION > 25
-        info->Set(nonseekable_sym, Integer::NewFromUnsigned(fi->nonseekable));
-#endif
-        info->Set(file_handle_sym, Number::New(fi->fh));
-        info->Set(lock_owner_sym, Number::New(fi->lock_owner));
-
-        //TODO set accessors for info.fh
-        return scope.Close(info);
-    }
-
 
     Handle<Value> FlockToObject(const struct flock *lock) {
         HandleScope scope;

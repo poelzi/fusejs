@@ -163,8 +163,10 @@ namespace NodeFuse {
         info->Set(conn_info_max_write_sym, Number::New(conn->max_write));
         info->Set(conn_info_max_readahead_sym, Number::New(conn->max_readahead));
         //TODO macro to enable certain properties given the fuse version
-        //info->Set(conn_info_capable_sym, Integer::New(conn->capable));
-        //info->Set(conn_info_want_sym, Integer::New(conn->want));
+        #if USE_FUSE_VERSION > 25
+        info->Set(conn_info_capable_sym, Integer::New(conn->capable));
+        info->Set(conn_info_want_sym, Integer::New(conn->want));
+        #endif
 
         Local<Value> argv[1] = {info};
 
